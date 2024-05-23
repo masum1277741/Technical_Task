@@ -6,3 +6,4 @@
   "DefaultConnection": "Data Source=DESKTOP-HMM90TP;Initial Catalog=SampleDB;User Id=sa;Password=sa1234;Integrated Security=True;MultipleActiveResultSets=True;Trusted_Connection=True;TrustServerCertificate=True;"
   
 **Finally you can update database using keyword "update-database" from package manager console. Now you are ready to run this project.
+https://github.com/masum1277741/Technical_Task/issues/1#issue-2312469986
