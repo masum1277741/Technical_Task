@@ -1,0 +1,242 @@
+﻿@model IEnumerable<TECHNICALTASK.Models.MasterTable>
+@{
+    ViewData["Title"] = "Home Page";
+    var counter = 1;
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="input1" placeholder="Number of textbox" aria-label="Number of textbox" aria-describedby="button-addon1">
+                <div class="input-group-append">
+                    <button class="btn btn-info" onclick="generateInputs1()" type="button" id="button-addon1">Add Text Box</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="input2" placeholder="Number of textbox" aria-label="Number of textbox" aria-describedby="button-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-info" type="button" onclick="generateInputs2()" id="button-addon2">Add Text Box</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mt-5" id="area1">
+            </div>
+            <div id="output1">
+                <label>Total items selected: 0 | Total sum: 0</label>
+            </div>
+            <button class="btn btn-success mt-3" onclick="saveData1()">Save Data 1</button>
+        </div>
+        <div class="col">
+            <div class="mt-5" id="area2">
+            </div>
+            <div id="output2">
+                <label>Total items selected: 0 | Positions: | Total sum: 0</label>
+            </div>
+            <button class="btn btn-success mt-3" onclick="saveData2()">Save Data 2</button>
+        </div>
+    </div>
+
+    @if (Model.Count() > 0)
+    {
+        <div class="container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">NO of item</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <th scope="row">@counter</th>
+                            <td>@item.NumberofItem</td>
+                            <td>@item.Details.Sum(e=>e.Amount)</td>
+                        </tr>
+                        counter++;
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    }
+
+
+
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(document).on('change', '#selectAll', function () {
+            const isChecked = $(this).is(':checked');
+            $('#area1 input[type="checkbox"]').not(this).prop('checked', isChecked);
+            updateSummary1();
+        });
+
+        $(document).on('change', '#area1 input[type="checkbox"]', function () {
+            if (!$(this).is('#selectAll')) {
+                const allChecked = $('#area1 input[type="checkbox"]').not('#selectAll').length === $('#area1 input[type="checkbox"]:checked').not('#selectAll').length;
+                $('#selectAll').prop('checked', allChecked);
+                updateSummary1();
+            }
+        });
+
+        $(document).on('input', '#area1 input[type="text"]', function () {
+            updateSummary1();
+        });
+
+        $(document).on('change', '#selectAll2', function () {
+            const isChecked = $(this).is(':checked');
+            $('#area2 input[type="checkbox"]').not(this).prop('checked', isChecked);
+            updateSummary2();
+        });
+
+        $(document).on('change', '#area2 input[type="checkbox"]', function () {
+            if (!$(this).is('#selectAll2')) {
+                const allChecked = $('#area2 input[type="checkbox"]').not('#selectAll2').length === $('#area2 input[type="checkbox"]:checked').not('#selectAll2').length;
+                $('#selectAll2').prop('checked', allChecked);
+                updateSummary2();
+            }
+        });
+
+        $(document).on('input', '#area2 input[type="text"]', function () {
+            updateSummary2();
+        });
+
+        function updateSummary1() {
+            const totalItems = $('#area1 input[type="checkbox"]:checked').not('#selectAll').length;
+            let totalSum = 0;
+            $('#area1 input[type="checkbox"]:checked').not('#selectAll').each(function () {
+                const index = $(this).attr('id').replace('custom', '');
+                const inputVal = parseFloat($(`#custominput${index}`).val()) || 0;
+                totalSum += inputVal;
+            });
+            $('#output1 label').text(`Total items selected: ${totalItems} | Total sum: ${totalSum}`);
+        }
+
+        function updateSummary2() {
+            const totalItems = $('#area2 input[type="checkbox"]:checked').not('#selectAll2').length;
+            let totalSum = 0;
+            let positions = [];
+            $('#area2 input[type="checkbox"]:checked').not('#selectAll2').each(function () {
+                const index = $(this).attr('id').replace('custom2_', '');
+                const inputVal = parseFloat($(`#custominput2_${index}`).val()) || 0;
+                totalSum += inputVal;
+                positions.push(parseInt(index) + 1);
+            });
+            $('#output2 label').text(`Total items selected: ${totalItems} | Positions: ${positions.join(', ')} | Total sum: ${totalSum}`);
+        }
+
+        window.saveData1 = function () {
+            let data = [];
+            $('#area1 .form-check').each(function () {
+                const checkbox = $(this).find('input[type="checkbox"]');
+                const textbox = $(this).find('input[type="text"]');
+                if (checkbox.is(':checked')) {
+                    data.push({
+                        checkboxId: checkbox.attr('id'),
+                        textboxValue: textbox.val()
+                    });
+                }
+            });
+            $.ajax({
+                type: 'POST',
+                url: '/Home/SaveData1',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    alert(response.message);
+                    window.location.reload();
+                }
+            });
+        }
+
+        window.saveData2 = function () {
+            let data = [];
+            $('#area2 .form-check').each(function () {
+                const checkbox = $(this).find('input[type="checkbox"]');
+                const textbox = $(this).find('input[type="text"]');
+                if (checkbox.is(':checked')) {
+                    data.push({
+                        checkboxId: checkbox.attr('id'),
+                        textboxValue: textbox.val()
+                    });
+                }
+            });
+            $.ajax({
+                type: 'POST',
+                url: '/Home/SaveData1',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    alert(response.message);
+                    window.location.reload();
+                }
+            });
+        }
+    });
+
+
+    function generateInputs1() {
+        const count = $('#input1').val();
+        const area1 = document.getElementById('area1');
+        area1.innerHTML = `
+                        <div class="mt-5">
+                            <div class="form-check p-2">
+                                <input class="form-check-input" type="checkbox" value="" id="selectAll">
+                                <label class="form-check-label" for="selectAll">
+                                    Select All
+                                </label>
+                            </div>
+                        </div>
+                    `;
+
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'form-check p-2';
+            div.innerHTML = `
+                            <input class="form-check-input" type="checkbox" value="" id="custom${i}">
+                            <input class="form-control" type="text" value="" id="custominput${i}">
+                        `;
+            area1.appendChild(div);
+        }
+    }
+
+    function generateInputs2() {
+        const count = $('#input2').val();
+        const area2 = document.getElementById('area2');
+        area2.innerHTML = `
+                        <div class="mt-5">
+                            <div class="form-check p-2">
+                                <input class="form-check-input" type="checkbox" value="" id="selectAll2">
+                                <label class="form-check-label" for="selectAll2">
+                                    Select All
+                                </label>
+                            </div>
+                        </div>
+                    `;
+
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'form-check p-2';
+            div.innerHTML = `
+                            <input class="form-check-input" type="checkbox" value="" id="custom2_${i}">
+                            <input class="form-control" type="text" value="" id="custominput2_${i}">
+                        `;
+            area2.appendChild(div);
+        }
+    }
+</script>
