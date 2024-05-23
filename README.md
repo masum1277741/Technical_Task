@@ -1,4 +1,4 @@
-**This project has created in Visual Studio 2022 using ASP.NET Core, MSSQL, Entity Framework 8.0
+**This project has created in Visual Studio 2022 using C#, HTML, CSS, Javascript, ASP.NET Core, MSSQL, Entity Framework 8.0
 
 **To run this project you need to change database connection from appsettings.json. The ConnectionString demo is given here that you can find in appsettings.json, you just change Data Source according your SQL Server.
 
